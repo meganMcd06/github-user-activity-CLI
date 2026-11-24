@@ -5,6 +5,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+
 public class Main 
 { 
     public static void main(String[] args ){
@@ -15,9 +20,12 @@ public class Main
 
         String username = args[0];
         System.out.println("Fetching activity for " + username);
-        try {
-            System.out.print(httpRequest(username).toString());
-        } catch (IOException ioe){
+
+        try{
+            System.out.println(formatActivity(jsonParse(httpRequest(username))));
+        } catch (JsonProcessingException jpe){
+            System.out.println("JSON processing error.");
+        }  catch (IOException ioe){
             System.out.println("Connection failed.");
         } catch(InterruptedException ie){
             Thread.currentThread().interrupt();
@@ -38,7 +46,11 @@ public class Main
             
 
             if (response.statusCode() == 200){
-                return(response.body());
+                if (response.body().trim().equals("[]")){
+                    return ("No activity.");
+                } else {
+                    return(response.body());
+                }
             } else if (response.statusCode() == 404){
                 return("404 activity not found or user doesn't exist.");
             } else if (response.statusCode() == 403){
@@ -46,5 +58,32 @@ public class Main
         } else {
             return(response.statusCode() + " error");
         }
+    }
+
+    public static JsonNode jsonParse(String response) throws JsonProcessingException{
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(response);
+        return rootNode;
+    }
+
+    public static String formatActivity(JsonNode node){
+
+        StringBuilder jsonString = new StringBuilder();
+
+        if (node.isEmpty()){
+            return "No activity.";
+        }
+
+
+        for (int i = 0; i < node.size(); i++){
+            if (!node.get(i).isEmpty()){
+                jsonString.append("Event: " + node.get(i).get("type").asText());
+                jsonString.append("Repo: " + node.get(i).get("repo").get("name").asText());
+                jsonString.append("\n\n");
+            }
+        }
+
+        return jsonString.toString();
+
     }
 }
