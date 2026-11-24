@@ -77,7 +77,8 @@ public class Main
 
         for (int i = 0; i < node.size(); i++){
             if (!node.get(i).isEmpty()){
-                jsonString.append("Event: " + node.get(i).get("type").asText());
+                jsonString.append("Event: " + describeEvent((node.get(i).get("type").asText())));
+                jsonString.append("\n");
                 jsonString.append("Repo: " + node.get(i).get("repo").get("name").asText());
                 jsonString.append("\n\n");
             }
@@ -85,5 +86,26 @@ public class Main
 
         return jsonString.toString();
 
+    }
+
+    public static String describeEvent(String event){
+        switch(event){
+            case "PushEvent":
+                return "Pushed commits";
+            case "WatchEvent":
+                return "Starred a repo";
+            case "IssuesEvent":
+                return "Performed action on an issue";
+            case "CreateEvent":
+                return "Created a tag, branch, or repo";
+            case "PullRequestEvent":
+                return "Performed an action on a pull request";
+            case "ForkEvent":
+                return "Forked a repo";
+            case "DeleteEvent":
+                return "Deleted a tag or branch";
+            default:
+                return "Unknown event";
+        }
     }
 }
