@@ -19,10 +19,15 @@ public class Main
         }
 
         String username = args[0];
-        System.out.println("Fetching activity for " + username);
+        System.out.println("Fetching activity for " + username + "\n\n");
 
         try{
-            System.out.println(formatActivity(jsonParse(httpRequest(username))));
+            if (httpRequest(username).equals("No activity.")){
+                System.out.println("No activity.");
+                return;
+            } else {
+                System.out.println(formatActivity(jsonParse(httpRequest(username))));
+            }
         } catch (JsonProcessingException jpe){
             System.out.println("JSON processing error.");
         }  catch (IOException ioe){
@@ -41,8 +46,6 @@ public class Main
                 .GET().build();
             HttpResponse<String> response = client.send(
                 request, HttpResponse.BodyHandlers.ofString());
-        
-            System.out.println(response.statusCode());
             
 
             if (response.statusCode() == 200){
@@ -59,6 +62,8 @@ public class Main
             return(response.statusCode() + " error");
         }
     }
+
+    //json processing exception when user has no public history
 
     public static JsonNode jsonParse(String response) throws JsonProcessingException{
         ObjectMapper objectMapper = new ObjectMapper();
