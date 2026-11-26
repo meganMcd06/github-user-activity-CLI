@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class Main 
 { 
     public static void main(String[] args ){
-        if (args.length == 0){
+        if (args.length != 1 || args[0].isBlank()){
             System.out.println("Provide a GitHub username");
             return;
         }
@@ -22,11 +22,12 @@ public class Main
         System.out.println("Fetching activity for " + username + "\n\n");
 
         try{
-            if (httpRequest(username).equals("No activity.")){
+            String httpResponse = httpRequest(username);
+            if (httpResponse.equals("No activity.")){
                 System.out.println("No activity.");
                 return;
             } else {
-                System.out.println(formatActivity(jsonParse(httpRequest(username))));
+                System.out.println(formatActivity(jsonParse(httpResponse)));
             }
         } catch (JsonProcessingException jpe){
             System.out.println("JSON processing error.");
