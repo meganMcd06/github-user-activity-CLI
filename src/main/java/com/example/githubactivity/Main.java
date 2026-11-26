@@ -19,16 +19,11 @@ public class Main
         }
 
         String username = args[0];
-        System.out.println("Fetching activity for " + username + "\n\n");
+        System.out.println("Fetching activity for " + username + "\n");
 
         try{
             String httpResponse = httpRequest(username);
-            if (httpResponse.equals("No activity.")){
-                System.out.println("No activity.");
-                return;
-            } else {
-                System.out.println(formatActivity(jsonParse(httpResponse)));
-            }
+            System.out.println(formatActivity(jsonParse(httpResponse)));
         } catch (JsonProcessingException jpe){
             System.out.println("JSON processing error.");
         }  catch (IOException ioe){
@@ -47,24 +42,17 @@ public class Main
                 .GET().build();
             HttpResponse<String> response = client.send(
                 request, HttpResponse.BodyHandlers.ofString());
-            
 
             if (response.statusCode() == 200){
-                if (response.body().trim().equals("[]")){
-                    return ("No activity.");
-                } else {
-                    return(response.body());
-                }
+                return response.body();
             } else if (response.statusCode() == 404){
                 return("404 activity not found or user doesn't exist.");
             } else if (response.statusCode() == 403){
                 return("403 request was refused or API rate limit exceeded.");
-        } else {
-            return(response.statusCode() + " error");
-        }
+            } else {
+                return(response.statusCode() + " error");
+            }
     }
-
-    //json processing exception when user has no public history
 
     public static JsonNode jsonParse(String response) throws JsonProcessingException{
         ObjectMapper objectMapper = new ObjectMapper();
